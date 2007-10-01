@@ -1,0 +1,83 @@
+
+## <summary>policy for rbot</summary>
+
+########################################
+## <summary>
+##	Execute a domain transition to run rbot.
+## </summary>
+## <param name="domain">
+## <summary>
+##	Domain allowed to transition.
+## </summary>
+## </param>
+#
+interface(`rbot_domtrans',`
+	gen_require(`
+		type rbot_t, rbot_exec_t;
+	')
+
+	domain_auto_trans($1,rbot_exec_t,rbot_t)
+
+	allow rbot_t $1:fd use;
+	allow rbot_t $1:fifo_file rw_file_perms;
+	allow rbot_t $1:process sigchld;
+')
+
+########################################
+## <summary>
+##	Search rbot rw directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`rbot_search_rw_dir',`
+	gen_require(`
+		type rbot_rw_t;
+	')
+
+	allow $1 rbot_rw_t:dir search_dir_perms;
+	files_search_rw($1)
+')
+
+########################################
+## <summary>
+##	Read rbot rw files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`rbot_read_rw_files',`
+	gen_require(`
+		type rbot_rw_t;
+	')
+
+	allow $1 rbot_rw_t:file r_file_perms;
+	allow $1 rbot_rw_t:dir list_dir_perms;
+	files_search_rw($1)
+')
+
+########################################
+## <summary>
+##	Create, read, write, and delete
+##	rbot rw files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`rbot_manage_rw_files',`
+	gen_require(`
+		type rbot_rw_t;
+	')
+
+	allow $1 rbot_rw_t:file manage_file_perms;
+	allow $1 rbot_rw_t:dir rw_dir_perms;
+')

@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+
+use strict;
+use RBot;
+use File::Slurp;
+
+# Initialize new object
+my $bot = RBot->new
+  ( Debug    => 1,
+    Nick     => 'R-bot',
+    Server   => 'irc.freenode.net',
+#    Password => 'myircpassword',
+#    Port     => '6667',
+    Username => 'R',
+    Ircname  => 'R',
+    Admin    => 'theowner',
+#    Apass    => 'R5ef9bcR',
+    Channels => [ '#r-bot' ],
+    LogPath  => './',
+  );
+
+my ($pass) = read_file( "nickserv.txt" ) if -r "nickserv.txt";
+$bot->{NSPass} = $pass if $pass;
+
+# Daemonize process 
+#$bot->daemon();
+
+# Run the bot
+$bot->run();
