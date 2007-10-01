@@ -1,0 +1,215 @@
+policy_module(rbot,1.0.0)
+
+########################################
+#
+# Declarations
+#
+require {
+        type restorecon_t;
+        type unconfined_t;
+        type net_conf_t;
+        type home_root_t;
+        type ld_so_t;
+        type usr_t;
+        type lib_t;
+        type node_t;
+        type dns_port_t;
+        type netif_t;
+        type tmp_t;
+        type unlabeled_t;
+        type devpts_t;
+        type locale_t;
+        type fs_t;
+        type user_home_dir_t;
+        type urandom_device_t;
+        type etc_t;
+        type ircd_port_t;
+        type bin_t;
+        type user_home_t;
+        type ld_so_cache_t;
+        
+	type shell_exec_t;
+	type proc_t;
+        type nscd_var_run_t;
+        
+        class process setsched;
+        class node { tcp_recv tcp_send udp_recv udp_send };
+        class netif { tcp_recv tcp_send udp_recv udp_send };
+        class chr_file { read write ioctl getattr };
+        class tcp_socket { name_connect send_msg read create getattr recv_msg write ioctl connect getopt };
+        class file { rename execute setattr read create ioctl write getattr entrypoint unlink append };
+        class filesystem associate;
+        class netlink_route_socket { write getattr read bind create nlmsg_read };
+        class lnk_file read;
+        class udp_socket { write ioctl send_msg read create getattr recv_msg };
+        class dir { write search remove_name getattr add_name read create rmdir };
+};
+
+type rbot_t;
+type rbot_exec_t;
+domain_type(rbot_t);
+
+## for rbot's files:
+type rbot_rw_t;
+files_type(rbot_rw_t)
+
+type rbot_ro_t;
+files_type(rbot_ro_t)
+
+type rbot_tmp_t;
+files_type(rbot_tmp_t)
+
+
+#fs_associate(rbot_exec_t)
+#fs_associate(rrun_exec_t)
+
+
+type rrun_t;
+type rrun_exec_t;
+domain_type(rrun_t)
+
+## for rrun files:
+type rrun_rw_t;
+files_type(rrun_rw_t)
+type rrun_ro_t;
+files_type(rrun_ro_t)
+
+## what the introduced domains do 
+
+allow rbot_t rbot_rw_t:dir rw_dir_perms;
+allow rbot_t rbot_rw_t:file create_file_perms;
+allow rbot_t rbot_tmp_t:dir create_dir_perms;
+allow rbot_t rbot_tmp_t:file create_file_perms;
+
+allow rbot_t rbot_ro_t:file read_file_perms;
+allow rbot_t rbot_ro_t:dir r_dir_perms;
+
+allow rbot_t rbot_exec_t:file { entrypoint getattr ioctl read };
+
+## transitions
+
+## goes over to rbot_t
+domain_auto_trans( unconfined_t, rbot_exec_t, rbot_t )
+
+## goes from rbot to rrun_t
+domain_auto_trans( rbot_t, rrun_exec_t, rrun_t )
+
+## bin
+corecmd_search_bin(rbot_t)
+corecmd_read_bin_symlinks(rbot_t)
+allow rbot_t bin_t:file { execute execute_no_trans getattr read };
+
+## etc
+files_read_etc_files(rbot_t)
+
+## home
+## need this to locate the other files if installed in home dir
+allow rbot_t user_home_t:dir search;
+#allow rbot_t user_home_t:file getattr;
+
+
+## lib related
+libs_read_lib_files(rbot_t)
+libs_use_ld_so(rbot_t)
+libs_use_lib_files(rbot_t)
+allow rbot_t ld_so_cache_t:file { getattr read };
+miscfiles_read_localization(rbot_t)
+
+
+## dev
+allow rbot_t devpts_t:chr_file { ioctl read write };
+allow rbot_t devpts_t:dir search;
+allow rbot_t urandom_device_t:chr_file read;
+
+## tmp
+allow rbot_t tmp_t:dir search_dir_perms;
+
+
+## var
+allow rbot_t tmp_t:dir search_dir_perms;
+allow rbot_t nscd_var_run_t:dir search;
+
+
+## net related
+corenet_tcp_connect_ircd_port(rbot_t)
+allow rbot_t net_conf_t:file { getattr read };
+allow rbot_t self:tcp_socket { connect create getattr getopt ioctl read write };
+allow rbot_t self:udp_socket { connect create getattr read write };
+allow rbot_t unlabeled_t:packet send;
+allow rbot_t unlabeled_t:packet recv;
+
+
+
+
+## needed to for R handling
+allow rbot_t shell_exec_t:file { execute execute_no_trans getattr read };
+allow rbot_t self:process setsched;
+allow rbot_t self:process sigkill;
+allow rbot_t proc_t:file { getattr read };
+allow rbot_t self:fifo_file { getattr ioctl read write };
+
+## pg access
+optional_policy(`
+        postgresql_stream_connect(rbot_t)
+');
+
+
+## things we don't really need
+files_dontaudit_search_home(rbot_t)
+userdom_dontaudit_read_sysadm_home_content_files(rbot_t)
+
+
+##### rrun related audits
+
+allow rrun_t rbot_tmp_t:dir { add_name getattr search write create remove_name read rmdir write };
+allow rrun_t rbot_tmp_t:file { create getattr ioctl read write rename unlink setattr };
+
+allow rrun_t tmp_t:dir { getattr search };
+
+allow rrun_t proc_t:file { getattr read };
+allow rrun_t rbot_t:fd use;
+allow rrun_t rbot_t:fifo_file { getattr ioctl write };
+allow rrun_t rbot_t:process sigchld;
+allow rrun_t rrun_exec_t:file { entrypoint getattr ioctl read };
+allow rrun_t shell_exec_t:file { execute execute_no_trans getattr read };
+
+
+
+corecmd_read_bin_symlinks(rrun_t)
+allow rrun_t bin_t:file { execute execute_no_trans getattr ioctl read };
+
+
+## although not needed for Rexec, kernel 2.6.18-8.1.10.el5.centos crashes unless this is granted:
+allow rrun_t devpts_t:dir search;
+allow rrun_t devpts_t:chr_file { getattr ioctl read write };
+
+
+files_read_etc_files(rrun_t)
+
+libs_read_lib_files(rrun_t)
+libs_use_ld_so(rrun_t)
+libs_use_lib_files(rrun_t)
+allow rrun_t ld_so_cache_t:file { getattr read };
+miscfiles_read_localization(rrun_t)
+
+
+allow rrun_t proc_t:file { getattr read };
+allow rrun_t rbot_t:fd use;
+allow rrun_t rbot_t:fifo_file { getattr ioctl write };
+allow rrun_t rbot_t:process sigchld;
+allow rrun_t rrun_exec_t:file { entrypoint getattr ioctl read };
+allow rrun_t shell_exec_t:file { execute execute_no_trans getattr read };
+
+allow rrun_t user_home_t:dir search;
+nscd_dontaudit_search_pid(rrun_t)
+files_dontaudit_search_home(rrun_t)
+
+
+## for ease of handling
+allow unconfined_t rrun_exec_t:file rw_file_perms;
+allow unconfined_t rbot_exec_t:file rw_file_perms;
+allow unconfined_t rbot_tmp_t:dir rw_dir_perms;
+allow unconfined_t rbot_tmp_t:file rw_file_perms;
+
+allow restorecon_t rbot_exec_t:file getattr;
+allow restorecon_t rrun_exec_t:file getattr;

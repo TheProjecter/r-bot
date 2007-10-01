@@ -1,0 +1,20 @@
+## FIX THESE PATHS TO MATCH YOUR SYSTEM
+/home/rbot/svn/rbot/rbot		--	gen_context(system_u:object_r:rbot_exec_t,s0)
+/home/rbot/svn/rbot/R\.run		--	gen_context(system_u:object_r:rrun_exec_t,s0)
+#
+/home/rbot/svn/rbot/bot\.log		--	gen_context(system_u:object_r:rbot_rw_t,s0)
+/home/rbot/svn/rbot/channel\.log	--	gen_context(system_u:object_r:rbot_rw_t,s0)
+/home/rbot/svn/rbot/server\.log		--	gen_context(system_u:object_r:rbot_rw_t,s0)
+/home/rbot/svn/rbot/nickserv\.txt	--	gen_context(system_u:object_r:rbot_ro_t,s0)
+/home/rbot/svn/rbot/RBot\.pm		--	gen_context(system_u:object_r:rbot_ro_t,s0)
+/home/rbot/svn/rbot/Plugin		-d	gen_context(system_u:object_r:rbot_ro_t,s0)
+# plugins go here:
+/home/rbot/svn/rbot/Plugin/DatabaseInterface\.pm --      gen_context(system_u:object_r:rbot_ro_t,s0)
+/home/rbot/svn/rbot/Plugin/\.db_setup\.yml\.pm   --      gen_context(system_u:object_r:rbot_ro_t,s0)
+/home/rbot/svn/rbot/Plugin/Rexec\.pm             --      gen_context(system_u:object_r:rbot_ro_t,s0)
+/home/rbot/svn/rbot/Plugin/PackageLookup\.pm     --      gen_context(system_u:object_r:rbot_ro_t,s0)
+#
+/tmp/rbot_tmpfiles			-d	gen_context(system_u:object_r:rbot_tmp_t,s0)
+/tmp/rbot_tmpfiles/.*			--	gen_context(system_u:object_r:rbot_tmp_t,s0)
+/tmp/FileCache				-d	gen_context(system_u:object_r:rbot_tmp_t,s0)
+/tmp/FileCache/.*			--	gen_context(system_u:object_r:rbot_tmp_t,s0)
