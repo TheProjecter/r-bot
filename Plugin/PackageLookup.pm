@@ -9,8 +9,27 @@ use Data::Dumper;
 use POE::Session;
 use URI;
 
-# SQL table for table packages
 #
+# SQL table for tables packages and repos
+#
+# CREATE TABLE repos (
+#     name character varying(64) NOT NULL,
+#     url character varying(256),
+#     id serial NOT NULL,
+#     package_url_prefix character varying(32),
+#     package_url_suffix character varying(32)
+# );
+# 
+# INSERT INTO repos VALUES ('BioC', 'http://www.bioinformatics.csiro.au/bioconductor/bioc', 7, 'html', '.html');
+# INSERT INTO repos VALUES ('Omega', 'http://www.omegahat.org/R', 8, '/', '');
+# INSERT INTO repos VALUES ('CRAN', 'http://cran.r-project.org', 9, '/src/contrib/Descriptions', '.html');
+# 
+# ALTER TABLE ONLY repos
+#     ADD CONSTRAINT name UNIQUE (name);
+# 
+# ALTER TABLE ONLY repos
+#     ADD CONSTRAINT repos_pkey PRIMARY KEY (id);
+# 
 # CREATE TABLE packages (
 #     package character varying(31),
 #     url character varying(127),
