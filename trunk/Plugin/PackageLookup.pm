@@ -9,15 +9,29 @@ use Data::Dumper;
 use POE::Session;
 use URI;
 
+# SQL table for table packages
+#
+# CREATE TABLE packages (
+#     package character varying(31),
+#     url character varying(127),
+#     maintainer character varying(255),
+#     description text,
+#     id serial NOT NULL,
+#     repo integer,
+#     package_date date,
+#     license character varying(32),
+#     version character varying(16),
+#     updated date,
+#     title text,
+#     author character varying(64),
+#     bundle character varying(128),
+#     priority character varying(31)
+# );
+# 
+
+
 sub _db_check {
   "Rbot::DB"->isa("DBIx::Class::Schema");
-}
-
-## creates sql
-sub setup  {
-  
-  
-  
 }
 
 sub on_public {
