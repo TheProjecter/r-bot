@@ -28,6 +28,12 @@ use URI;
 #     priority character varying(31)
 # );
 # 
+# ALTER TABLE ONLY packages
+#    ADD CONSTRAINT packages_pkey PRIMARY KEY (id);
+#
+# ALTER TABLE ONLY packages
+#    ADD CONSTRAINT packages_repo_fkey FOREIGN KEY (repo) REFERENCES repos(id);
+#
 
 
 sub _db_check {
