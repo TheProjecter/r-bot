@@ -1,0 +1,6 @@
+## sample .db_setup.yml file
+---
+database: rbot
+hostname: localhost
+password: mypass
+username: rbot
