@@ -1,4 +1,4 @@
-## sample .db_setup.yml file
+## sample .db_setup.yml file , rename to .db_setup.yml
 ---
 database: rbot
 hostname: localhost
