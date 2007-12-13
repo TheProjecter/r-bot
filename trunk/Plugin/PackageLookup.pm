@@ -8,6 +8,7 @@ use Compress::Zlib;
 use Data::Dumper;
 use POE::Session;
 use URI;
+use Encode;
 
 #
 # SQL table for tables packages and repos
@@ -134,7 +135,7 @@ sub _update_packages {
   
   for my $repo ( Rbot::DB->resultset('Repos')->all ) {
     my $zip_data = get( $repo->url . "/src/contrib/PACKAGES.gz" );
-    my $package_info = Compress::Zlib::memGunzip($zip_data);
+    my $package_info = decode( "iso-8859-1", Compress::Zlib::memGunzip($zip_data) );
     
     my @chunks = grep {$_} split /Package:/, $package_info;
     
