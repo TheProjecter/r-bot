@@ -76,9 +76,7 @@ sub on_public {
   
   if($msg =~ /$own_nick: (\S+)\?$/) {
     
-    my $p = Rbot::DB->resultset("Packages")->search( { package => { like => $1 } } );
-    
-    
+    my $p = Rbot::DB->resultset("Packages")->search( { package => { ilike => $1 } } );
     
     if( $p == 0 ){
       
